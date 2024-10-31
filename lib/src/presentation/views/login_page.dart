@@ -1,52 +1,104 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:auto_route/auto_route.dart'; // Import AutoRoute package
-import '../cubits/login/login_cubit.dart';
-import '../../config/router/app_router.dart';
+import 'register.dart'; // Import the Register page
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: BlocProvider(
-        create: (_) => LoginCubit(),
-        child: BlocConsumer<LoginCubit, LoginStatus>(
-          listener: (context, state) {
-            if (state == LoginStatus.success) {
-              context.router
-                  .replace(MainPageRoute()); // Use auto_route's navigation
-            } else if (state == LoginStatus.failure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Login Failed')),
-              );
-            }
-          },
-          builder: (context, state) {
-            if (state == LoginStatus.loading) {
-              return Center(child: CircularProgressIndicator());
-            }
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  TextField(
-                    decoration: InputDecoration(labelText: 'Phone Number'),
-                  ),
-                  TextField(
-                    decoration: InputDecoration(labelText: 'OTP'),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<LoginCubit>().login("123456", "1234");
-                    },
-                    child: Text('Login'),
-                  ),
-                ],
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Color(0xfff7f6fb),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 24, horizontal: 32),
+          child: Column(
+            children: [
+              Image.asset(
+                'assets/images/illustration-1.png',
+                width: 240,
               ),
-            );
-          },
+              SizedBox(height: 18),
+              Text(
+                "Let's get started",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                "Never a better time than now to start.",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black38,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 38),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => Register()),
+                    );
+                  },
+                  style: ButtonStyle(
+                    foregroundColor:
+                        MaterialStateProperty.all<Color>(Colors.white),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.purple),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(14.0),
+                    child: Text(
+                      'Create Account',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 22),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Add any login action here if needed
+                  },
+                  style: ButtonStyle(
+                    foregroundColor:
+                        MaterialStateProperty.all<Color>(Colors.purple),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.white),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(14.0),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
