@@ -56,13 +56,19 @@ class _MainPageState extends State<MainPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(10.0),
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Search Movies',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
+                hintText: 'Enter movie title',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.white.withAlpha(235),
+                prefixIcon: const Icon(Icons.search),
               ),
             ),
           ),
@@ -80,41 +86,35 @@ class _MainPageState extends State<MainPage> {
                     ),
                   );
                 } else if (state is MainPageLoaded) {
-                  return ListView.separated(
+                  return ListView.builder(
                     itemCount: state.items.length,
-                    separatorBuilder: (_, index) => const Divider(),
                     itemBuilder: (context, index) {
                       var movie = state.items[index];
-                      return ListTile(
-                        leading: movie.posterPath != null
+                      return Card(
+                        elevation: 5,
+                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(8),
+                          leading: movie.posterPath != null
                             ? Image.network(
                                 movie.posterPath,
                                 width: 50,
-                                height: 80,
+                                height: 100,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(Icons.error),
+                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
                               )
                             : const Icon(Icons.movie, color: Colors.deepPurple),
-                        title: Text(
-                          movie.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          title: Text(movie.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text(movie.overview, maxLines: 2, overflow: TextOverflow.ellipsis),
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('Rating: ${movie.voteAverage.toStringAsFixed(1)}'),
+                              Text('Votes: ${movie.voteCount}'),
+                            ],
+                          ),
+                          onTap: () => context.router.push(DetailPageRoute(movie: movie)),
                         ),
-                        subtitle: Text(
-                          movie.overview,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text(
-                                'Rating: ${movie.voteAverage.toStringAsFixed(1)}'),
-                            Text('Votes: ${movie.voteCount}'),
-                          ],
-                        ),
-                        onTap: () =>
-                            context.router.push(DetailPageRoute(movie: movie)),
                       );
                     },
                   );
