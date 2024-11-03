@@ -18,3 +18,5 @@ class DataFailed<T> extends DataState<T> {
 class DataNotSet<T> extends DataState<T> {
   const DataNotSet();
 }
+
+

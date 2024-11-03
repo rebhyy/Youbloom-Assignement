@@ -11,7 +11,10 @@ part 'app_router.gr.dart';
   routes: [
     AutoRoute(
         page: LoginPage, initial: true), // Set LoginPage as the initial route
-    AutoRoute(page: MainPage, path: '/main'), // MainPage for main content
+    AutoRoute(
+      page: MainPage,
+      path: '/main',
+    ), // MainPage for main content
     AutoRoute(page: DetailPage, path: '/detail'), // DetailPage for item details
   ],
 )

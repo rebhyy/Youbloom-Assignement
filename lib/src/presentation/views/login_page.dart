@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'main_page.dart';
 import 'register.dart'; // Import the Register page
 
 class LoginPage extends StatefulWidget {
@@ -75,7 +76,9 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Add any login action here if needed
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => MainPage()),
+                    );
                   },
                   style: ButtonStyle(
                     foregroundColor:

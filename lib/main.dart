@@ -8,11 +8,12 @@ import 'src/locator.dart';
 import 'src/presentation/cubits/login/login_cubit.dart';
 import 'src/presentation/cubits/main_page/main_page_cubit.dart';
 import 'src/utils/constants/strings.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:dio/dio.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize any dependencies (if needed)
   await initializeDependencies();
 
   runApp(MyApp());
@@ -27,7 +28,8 @@ class MyApp extends StatelessWidget {
           create: (context) => LoginCubit(),
         ),
         BlocProvider(
-          create: (context) => MainPageCubit(),
+          create: (context) =>
+              MainPageCubit(locator<Dio>()), // Pass Dio instance here
         ),
       ],
       child: OKToast(
