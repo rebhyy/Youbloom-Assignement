@@ -5,11 +5,12 @@ import '../../../utils/resources/config.dart';
 
 class MainPageCubit extends Cubit<MainPageState> {
   final Dio _dio;
+  List<Movie> _allItems = []; // Store all fetched items for filtering
 
   MainPageCubit(this._dio) : super(MainPageLoading());
 
   Future<void> fetchItems() async {
-    emit(MainPageLoading()); 
+    emit(MainPageLoading());
     try {
       final response = await _dio.get(
         'https://api.themoviedb.org/3/movie/popular',
@@ -20,11 +21,11 @@ class MainPageCubit extends Cubit<MainPageState> {
         },
       );
 
-      final items = (response.data['results'] as List)
+      _allItems = (response.data['results'] as List)
           .map((movieJson) => Movie.fromJson(movieJson))
           .toList();
 
-      emit(MainPageLoaded(items));
+      emit(MainPageLoaded(_allItems)); // Emit the loaded state with all items
     } catch (error) {
       print('Error fetching movies: $error');
       emit(MainPageError('Failed to load movies. Please try again.'));
@@ -32,25 +33,23 @@ class MainPageCubit extends Cubit<MainPageState> {
   }
 
   void filterItems(String query) {
-    if (state is MainPageLoaded) {
-      final items = (state as MainPageLoaded).items;
-      final filteredItems = query.isEmpty
-          ? items
-          : items.where((item) => item.title.toLowerCase().contains(query.toLowerCase())).toList();
-      emit(MainPageLoaded(filteredItems));
-    }
+    final filteredItems = query.isEmpty
+        ? List<Movie>.from(_allItems)
+        : _allItems
+            .where((movie) =>
+                movie.title.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+    emit(MainPageLoaded(
+        List<Movie>.from(filteredItems))); // Force a new list instance
   }
 }
-
-
-// Define the MainPageState abstract class and its subclasses
 
 abstract class MainPageState {}
 
 class MainPageLoading extends MainPageState {}
 
 class MainPageLoaded extends MainPageState {
-  final List<Movie> items;  // Ensure this is List<Movie>
+  final List<Movie> items;
   MainPageLoaded(this.items);
 }
 

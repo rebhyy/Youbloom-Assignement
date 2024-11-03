@@ -1,13 +1,45 @@
+import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubits/main_page/main_page_cubit.dart';
 import '../../config/router/app_router.dart';
-import '../../locator.dart'; // Import locator
-import '../../domain/models/movie.dart'; // Import the Movie model
+import '../../locator.dart';
+import '../../domain/models/movie.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<MainPageCubit>().fetchItems(); // Fetch items on init
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        context.read<MainPageCubit>().filterItems(_searchController.text);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,78 +53,77 @@ class MainPage extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocProvider(
-        create: (_) => MainPageCubit(locator<Dio>())..fetchItems(),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Search Movies',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.search),
-                ),
-                onChanged: (query) =>
-                    context.read<MainPageCubit>().filterItems(query),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                labelText: 'Search Movies',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
               ),
             ),
-            Expanded(
-              child: BlocBuilder<MainPageCubit, MainPageState>(
-                builder: (context, state) {
-                  if (state is MainPageLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is MainPageError) {
-                    return Center(
-                      child: Text(
-                        state.message,
-                        style: const TextStyle(color: Colors.red, fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  } else if (state is MainPageLoaded) {
-                    return ListView.separated(
-                      itemCount: state.items.length,
-                      separatorBuilder: (_, index) => const Divider(),
-                      itemBuilder: (context, index) {
-                        var movie = state.items[index];
-                        return ListTile(
-                          leading: movie.posterPath != null
+          ),
+          Expanded(
+            child: BlocBuilder<MainPageCubit, MainPageState>(
+              builder: (context, state) {
+                if (state is MainPageLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is MainPageError) {
+                  return Center(
+                    child: Text(
+                      state.message,
+                      style: const TextStyle(color: Colors.red, fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                } else if (state is MainPageLoaded) {
+                  return ListView.separated(
+                    itemCount: state.items.length,
+                    separatorBuilder: (_, index) => const Divider(),
+                    itemBuilder: (context, index) {
+                      var movie = state.items[index];
+                      return ListTile(
+                        leading: movie.posterPath != null
                             ? Image.network(
                                 movie.posterPath,
                                 width: 50,
                                 height: 80,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.error),
                               )
                             : const Icon(Icons.movie, color: Colors.deepPurple),
-                          title: Text(
-                            movie.title,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            movie.overview,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Text('Rating: ${movie.voteAverage.toStringAsFixed(1)}'),
-                              Text('Votes: ${movie.voteCount}'),
-                            ],
-                          ),
-                          onTap: () => context.router.push(DetailPageRoute(movie: movie)),
-                        );
-                      },
-                    );
-                  }
-                  return const Center(child: Text('No movies found'));
-                },
-              ),
+                        title: Text(
+                          movie.title,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          movie.overview,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text(
+                                'Rating: ${movie.voteAverage.toStringAsFixed(1)}'),
+                            Text('Votes: ${movie.voteCount}'),
+                          ],
+                        ),
+                        onTap: () =>
+                            context.router.push(DetailPageRoute(movie: movie)),
+                      );
+                    },
+                  );
+                }
+                return const Center(child: Text('No movies found'));
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
