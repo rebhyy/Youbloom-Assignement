@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubits/main_page/main_page_cubit.dart';
 import '../../config/router/app_router.dart';
 import '../../locator.dart'; // Import locator
+import '../../domain/models/movie.dart'; // Import the Movie model
 
 class MainPage extends StatelessWidget {
   @override
@@ -13,10 +14,15 @@ class MainPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Popular Movies'),
         backgroundColor: Colors.deepPurple,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => context.read<MainPageCubit>().fetchItems(),
+          ),
+        ],
       ),
       body: BlocProvider(
-        create: (_) => MainPageCubit(locator<Dio>())
-          ..fetchItems(), // Pass Dio instance from locator
+        create: (_) => MainPageCubit(locator<Dio>())..fetchItems(),
         child: Column(
           children: [
             Padding(
@@ -45,25 +51,43 @@ class MainPage extends StatelessWidget {
                       ),
                     );
                   } else if (state is MainPageLoaded) {
-                    return ListView.builder(
+                    return ListView.separated(
                       itemCount: state.items.length,
+                      separatorBuilder: (_, index) => const Divider(),
                       itemBuilder: (context, index) {
+                        var movie = state.items[index];
                         return ListTile(
+                          leading: movie.posterPath != null
+                            ? Image.network(
+                                movie.posterPath,
+                                width: 50,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+                              )
+                            : const Icon(Icons.movie, color: Colors.deepPurple),
                           title: Text(
-                            state.items[index],
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w500),
+                            movie.title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          trailing: const Icon(Icons.arrow_forward_ios,
-                              color: Colors.deepPurple),
-                          onTap: () => context.router.push(
-                            DetailPageRoute(item: state.items[index]),
+                          subtitle: Text(
+                            movie.overview,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('Rating: ${movie.voteAverage.toStringAsFixed(1)}'),
+                              Text('Votes: ${movie.voteCount}'),
+                            ],
+                          ),
+                          onTap: () => context.router.push(DetailPageRoute(movie: movie)),
                         );
                       },
                     );
                   }
-                  return Container();
+                  return const Center(child: Text('No movies found'));
                 },
               ),
             ),

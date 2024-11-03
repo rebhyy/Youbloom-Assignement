@@ -20,7 +20,7 @@ class _$AppRouter extends RootStackRouter {
     LoginPageRoute.name: (routeData) {
       return AdaptivePage<dynamic>(
         routeData: routeData,
-        child: LoginPage(),
+        child: const LoginPage(),
       );
     },
     MainPageRoute.name: (routeData) {
@@ -31,9 +31,12 @@ class _$AppRouter extends RootStackRouter {
     },
     DetailPageRoute.name: (routeData) {
       final args = routeData.argsAs<DetailPageRouteArgs>();
-      return AdaptivePage<dynamic>(
+      return AdaptivePage<Movie>(
         routeData: routeData,
-        child: DetailPage(item: args.item),
+        child: DetailPage(
+          key: args.key,
+          movie: args.movie,
+        ),
       );
     },
   };
@@ -82,23 +85,33 @@ class MainPageRoute extends PageRouteInfo<void> {
 /// generated route for
 /// [DetailPage]
 class DetailPageRoute extends PageRouteInfo<DetailPageRouteArgs> {
-  DetailPageRoute({required String item})
-      : super(
+  DetailPageRoute({
+    Key? key,
+    required Movie movie,
+  }) : super(
           DetailPageRoute.name,
           path: '/detail',
-          args: DetailPageRouteArgs(item: item),
+          args: DetailPageRouteArgs(
+            key: key,
+            movie: movie,
+          ),
         );
 
   static const String name = 'DetailPageRoute';
 }
 
 class DetailPageRouteArgs {
-  const DetailPageRouteArgs({required this.item});
+  const DetailPageRouteArgs({
+    this.key,
+    required this.movie,
+  });
 
-  final String item;
+  final Key? key;
+
+  final Movie movie;
 
   @override
   String toString() {
-    return 'DetailPageRouteArgs{item: $item}';
+    return 'DetailPageRouteArgs{key: $key, movie: $movie}';
   }
 }
