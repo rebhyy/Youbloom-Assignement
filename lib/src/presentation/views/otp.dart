@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../config/router/app_router.dart';
+
 class Otp extends StatefulWidget {
   const Otp({Key? key}) : super(key: key);
 
@@ -79,7 +81,10 @@ class _OtpState extends State<Otp> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          appRouter.push(
+                              const MainPageRoute()); // Using MainPageRoute to navigate
+                        },
                         style: ButtonStyle(
                           foregroundColor:
                               MaterialStateProperty.all<Color>(Colors.white),
@@ -92,7 +97,7 @@ class _OtpState extends State<Otp> {
                             ),
                           ),
                         ),
-                        child: Padding(
+                        child: const Padding(
                           padding: EdgeInsets.all(14.0),
                           child: Text(
                             'Verify',
