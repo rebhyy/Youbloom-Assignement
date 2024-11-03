@@ -14,24 +14,24 @@ class _OtpState extends State<Otp> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Color(0xfff7f6fb),
+      backgroundColor: const Color(0xfff7f6fb),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 24, horizontal: 32),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
           child: Column(
             children: [
               Align(
                 alignment: Alignment.topLeft,
                 child: GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: Icon(
+                  child: const Icon(
                     Icons.arrow_back,
                     size: 32,
                     color: Colors.black54,
                   ),
                 ),
               ),
-              SizedBox(height: 18),
+              const SizedBox(height: 18),
               Container(
                 width: MediaQuery.of(context).size.width * 0.5,
                 height: MediaQuery.of(context).size.width * 0.5,
@@ -41,16 +41,16 @@ class _OtpState extends State<Otp> {
                 ),
                 child: Image.asset('assets/images/illustration-3.png'),
               ),
-              SizedBox(height: 24),
-              Text(
+              const SizedBox(height: 24),
+              const Text(
                 'Verification',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 10),
-              Text(
+              const SizedBox(height: 10),
+              const Text(
                 "Enter your OTP code number",
                 style: TextStyle(
                   fontSize: 14,
@@ -59,9 +59,9 @@ class _OtpState extends State<Otp> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 28),
+              const SizedBox(height: 28),
               Container(
-                padding: EdgeInsets.all(28),
+                padding: const EdgeInsets.all(28),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -77,7 +77,7 @@ class _OtpState extends State<Otp> {
                         _textFieldOTP(first: false, last: true),
                       ],
                     ),
-                    SizedBox(height: 22),
+                    const SizedBox(height: 22),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -109,8 +109,8 @@ class _OtpState extends State<Otp> {
                   ],
                 ),
               ),
-              SizedBox(height: 18),
-              Text(
+              const SizedBox(height: 18),
+              const Text(
                 "Didn't you receive any code?",
                 style: TextStyle(
                   fontSize: 14,
@@ -119,10 +119,10 @@ class _OtpState extends State<Otp> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 18),
-              Text(
+              const SizedBox(height: 18),
+              const Text(
                 "Resend New Code",
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.purple,
@@ -153,17 +153,17 @@ class _OtpState extends State<Otp> {
           showCursor: false,
           readOnly: false,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           keyboardType: TextInputType.number,
           maxLength: 1,
           decoration: InputDecoration(
-            counter: Offstage(),
+            counter: const Offstage(),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(width: 2, color: Colors.black12),
+              borderSide: const BorderSide(width: 2, color: Colors.black12),
               borderRadius: BorderRadius.circular(12),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(width: 2, color: Colors.purple),
+              borderSide: const BorderSide(width: 2, color: Colors.purple),
               borderRadius: BorderRadius.circular(12),
             ),
           ),

@@ -31,7 +31,7 @@ class MainPage extends StatelessWidget {
                         title: Text(items[index]),
                         onTap: () => context.router.push(
                           DetailPageRoute(
-                              item: items[index]), // Using auto_route
+                              item: items[index]), 
                         ),
                       );
                     },
