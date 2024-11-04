@@ -1,5 +1,8 @@
 plugins {
     id 'com.android.application'
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id 'kotlin-android'
     id 'org.jetbrains.kotlin.android' // For Kotlin support, if required
 }
@@ -41,10 +44,10 @@ android {
 
     defaultConfig {
         applicationId "com.example.flutter_clean_architecture"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        minSdkVersion 23
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
     }
 
     buildTypes {

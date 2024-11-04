@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../cubits/login/login_cubit.dart';
 import 'otp.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
@@ -13,6 +15,7 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -24,11 +27,24 @@ class _RegisterState extends State<Register> {
     if (value.isEmpty) {
       return 'Phone number is required';
     }
-    final phoneRegex = RegExp(r'^[0-9]{8,12}$');
+    // Validate if the phone number is in E.164 format (simplified check)
+    final phoneRegex = RegExp(
+        r'^\+[1-9]\d{1,14}$'); // This regex checks if the number starts with '+' and has 8 to 15 digits total
     if (!phoneRegex.hasMatch(value)) {
-      return 'Enter a valid phone number (8 to 12 digits)';
+      return 'Enter a valid phone number in international format starting with +';
     }
     return null;
+  }
+
+  String formatPhoneNumber(String phoneNumber) {
+    // Assuming phoneNumber is obtained from IntlPhoneField and already in complete format
+    // This function should check if the number starts with '+' and has only digits afterwards
+    String formattedNumber =
+        phoneNumber.replaceAll(RegExp(r'\D'), ''); // Remove all non-digits
+    if (!formattedNumber.startsWith('+')) {
+      formattedNumber = '+' + formattedNumber;
+    }
+    return formattedNumber;
   }
 
   @override
@@ -105,72 +121,95 @@ class _RegisterState extends State<Register> {
                       child: Column(
                         children: [
                           IntlPhoneField(
-                            controller: _phoneController,
                             decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    const BorderSide(color: Colors.black12),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide:
-                                    const BorderSide(color: Colors.black12),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              suffixIcon: const Icon(
-                                Icons.check_circle,
-                                color: Colors.green,
-                                size: 32,
-                              ),
-                              hintText: 'Phone number',
-                              hintStyle: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
+                              labelText: 'Phone Number',
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(),
                               ),
                             ),
                             initialCountryCode:
-                                'ID', // Initial country code; adjust as needed
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                                'TN', // Ensure this is the correct country code for Tunisia
                             onChanged: (phone) {
-                              print(phone.completeNumber);
+                              // Check if the phone object is not null and then access completeNumber
+                              if (phone != null) {
+                                print("Changed: " + phone.completeNumber);
+                                // Set the complete number to the controller
+                                _phoneController.text = phone.completeNumber;
+                              }
                             },
-                            validator: (value) =>
-                                _validatePhoneNumber(value! as String),
+                            onSaved: (phone) {
+                              // Similarly, check for null before accessing completeNumber
+                              if (phone != null) {
+                                _phoneController.text = phone.completeNumber;
+                              }
+                            },
+                            validator: (phone) {
+                              // Ensure phone is not null and not empty
+                              if (phone == null ||
+                                  phone.completeNumber.isEmpty) {
+                                return 'Phone number is required';
+                              }
+                              // Use the complete number for regex match
+                              if (!RegExp(r'^\+[1-9]\d{1,14}$')
+                                  .hasMatch(phone.completeNumber)) {
+                                return 'Enter a valid phone number in international format starting with +';
+                              }
+                              return null;
+                            },
                           ),
                           const SizedBox(height: 22),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (context) => const Otp()),
-                                  );
+                                  setState(() {
+                                    _isLoading = true; // Show loading indicator
+                                  });
+                                  // Format phone number to E.164
+                                  String formattedPhoneNumber =
+                                      formatPhoneNumber(_phoneController.text);
+                                  print(
+                                      "Formatted Phone Number: $formattedPhoneNumber"); // Log to debug
+
+                                  // Send OTP
+                                  context
+                                      .read<LoginCubit>()
+                                      .sendOtp(formattedPhoneNumber);
+
+                                  // Navigate to OTP screen after sending OTP
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) => const Otp()));
+
+                                  setState(() {
+                                    _isLoading =
+                                        false; // Hide loading indicator
+                                  });
                                 }
                               },
                               style: ButtonStyle(
-                                foregroundColor: WidgetStateProperty.all<Color>(
-                                    Colors.white),
-                                backgroundColor: WidgetStateProperty.all<Color>(
-                                    Colors.purple),
-                                shape: WidgetStateProperty.all<
+                                foregroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.white),
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.purple),
+                                shape: MaterialStateProperty.all<
                                     RoundedRectangleBorder>(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(24.0),
                                   ),
                                 ),
                               ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(14.0),
-                                child: Text(
-                                  'Send',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
+                              child: _isLoading
+                                  ? const CircularProgressIndicator() // Show loading indicator
+                                  : const Padding(
+                                      padding: EdgeInsets.all(14.0),
+                                      child: Text(
+                                        'Send',
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ),
                             ),
                           ),
                         ],

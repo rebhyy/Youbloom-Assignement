@@ -16,18 +16,21 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    context.read<MainPageCubit>().fetchItems(); // Fetch items on init
+    context.read<MainPageCubit>().fetchItems(); // Initial fetch
     _searchController.addListener(_onSearchChanged);
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     _debounce?.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -38,6 +41,15 @@ class _MainPageState extends State<MainPage> {
         context.read<MainPageCubit>().filterItems(_searchController.text);
       }
     });
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent &&
+        !_scrollController.position.outOfRange) {
+      // Trigger pagination fetch
+      context.read<MainPageCubit>().fetchItems(isPagination: true);
+    }
   }
 
   @override
@@ -87,33 +99,47 @@ class _MainPageState extends State<MainPage> {
                   );
                 } else if (state is MainPageLoaded) {
                   return ListView.builder(
-                    itemCount: state.items.length,
+                    controller: _scrollController,
+                    itemCount: state.isLoadingMore
+                        ? state.items.length + 1
+                        : state.items.length,
                     itemBuilder: (context, index) {
+                      if (index >= state.items.length) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
                       var movie = state.items[index];
                       return Card(
                         elevation: 5,
-                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
                         child: ListTile(
                           contentPadding: const EdgeInsets.all(8),
                           leading: movie.posterPath != null
-                            ? Image.network(
-                                movie.posterPath,
-                                width: 50,
-                                height: 100,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
-                              )
-                            : const Icon(Icons.movie, color: Colors.deepPurple),
-                          title: Text(movie.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(movie.overview, maxLines: 2, overflow: TextOverflow.ellipsis),
+                              ? Image.network(
+                                  movie.posterPath,
+                                  width: 50,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.error),
+                                )
+                              : const Icon(Icons.movie,
+                                  color: Colors.deepPurple),
+                          title: Text(movie.title,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text(movie.overview,
+                              maxLines: 2, overflow: TextOverflow.ellipsis),
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Text('Rating: ${movie.voteAverage.toStringAsFixed(1)}'),
+                              Text(
+                                  'Rating: ${movie.voteAverage.toStringAsFixed(1)}'),
                               Text('Votes: ${movie.voteCount}'),
                             ],
                           ),
-                          onTap: () => context.router.push(DetailPageRoute(movie: movie)),
+                          onTap: () => context.router
+                              .push(DetailPageRoute(movie: movie)),
                         ),
                       );
                     },

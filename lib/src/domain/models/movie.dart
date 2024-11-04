@@ -17,9 +17,21 @@ class Movie {
     return Movie(
       title: json['title'] as String,
       overview: json['overview'] as String,
-      posterPath: 'https://image.tmdb.org/t/p/w500${json['poster_path']}',
+      posterPath: json['poster_path'] != null
+          ? 'https://image.tmdb.org/t/p/w500${json['poster_path']}'
+          : '', // Fallback if poster_path is missing
       voteAverage: (json['vote_average'] as num).toDouble(),
       voteCount: json['vote_count'] as int,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'overview': overview,
+      'voteAverage': voteAverage,
+      'voteCount': voteCount,
+      'posterPath': posterPath ?? '', // Provide fallback to empty string
+    };
   }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "635511384320",
+    "project_id": "youbloom-assignement",
+    "storage_bucket": "youbloom-assignement.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:635511384320:android:bccc1e03b2e1db6000abe5",
+        "android_client_info": {
+          "package_name": "com.example.flutter_clean_architecture"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3lKgCA2l5n01SrmArmoVbFcVRfrx-B3A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

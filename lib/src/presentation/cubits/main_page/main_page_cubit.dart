@@ -5,30 +5,43 @@ import '../../../utils/resources/config.dart';
 
 class MainPageCubit extends Cubit<MainPageState> {
   final Dio _dio;
-  List<Movie> _allItems = []; // Store all fetched items for filtering
+  List<Movie> _allItems = [];
+  int _currentPage = 1;
+  bool _isLoadingMore = false; // Flag to prevent duplicate requests
 
   MainPageCubit(this._dio) : super(MainPageLoading());
 
-  Future<void> fetchItems() async {
-    emit(MainPageLoading());
+  Future<void> fetchItems({bool isPagination = false}) async {
+    if (_isLoadingMore && isPagination)
+      return; // Prevent duplicate pagination requests
+    if (isPagination) _isLoadingMore = true;
+
+    emit(isPagination
+        ? MainPageLoaded(_allItems, isLoadingMore: true)
+        : MainPageLoading());
+
     try {
       final response = await _dio.get(
         'https://api.themoviedb.org/3/movie/popular',
         queryParameters: {
           'api_key': tmdbApiKey,
           'language': 'en-US',
-          'page': 1,
+          'page': _currentPage,
         },
       );
 
-      _allItems = (response.data['results'] as List)
+      final newItems = (response.data['results'] as List)
           .map((movieJson) => Movie.fromJson(movieJson))
           .toList();
 
-      emit(MainPageLoaded(_allItems)); // Emit the loaded state with all items
+      _allItems.addAll(newItems);
+      _currentPage++; // Increment page for the next fetch
+
+      emit(MainPageLoaded(_allItems));
     } catch (error) {
-      print('Error fetching movies: $error');
       emit(MainPageError('Failed to load movies. Please try again.'));
+    } finally {
+      _isLoadingMore = false;
     }
   }
 
@@ -39,19 +52,19 @@ class MainPageCubit extends Cubit<MainPageState> {
             .where((movie) =>
                 movie.title.toLowerCase().contains(query.toLowerCase()))
             .toList();
-    emit(MainPageLoaded(
-        List<Movie>.from(filteredItems))); // Force a new list instance
+    emit(MainPageLoaded(filteredItems));
   }
+}
+
+class MainPageLoaded extends MainPageState {
+  final List<Movie> items;
+  final bool isLoadingMore;
+  MainPageLoaded(this.items, {this.isLoadingMore = false});
 }
 
 abstract class MainPageState {}
 
 class MainPageLoading extends MainPageState {}
-
-class MainPageLoaded extends MainPageState {
-  final List<Movie> items;
-  MainPageLoaded(this.items);
-}
 
 class MainPageError extends MainPageState {
   final String message;
